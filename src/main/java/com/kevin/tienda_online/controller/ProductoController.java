@@ -15,10 +15,12 @@ import com.kevin.tienda_online.dto.ProductoRequest;
 import com.kevin.tienda_online.dto.ProductoResponse;
 import com.kevin.tienda_online.service.ProductoService;
 
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import org.springframework.web.bind.annotation.PutMapping;
 
-
+@Tag(name = "Producto", description = "Operaciones relacionadas con productos")
 @RestController
 @RequestMapping("/api/productos")
 public class ProductoController {
@@ -26,16 +28,19 @@ public class ProductoController {
     @Autowired
     private ProductoService productoService;
 
+    @Operation(summary = "Crear producto", description = "Crear un nuevo producto")
     @PostMapping
     public ProductoResponse crearProducto(@Valid @RequestBody ProductoRequest request) {
         return productoService.crearProducto(request);
     }
 
+    @Operation(summary = "Listar productos", description = "Listar todos los productos")
     @GetMapping
     public List<ProductoResponse> listarProductos() {
         return productoService.listarProductos();
     } 
 
+    @Operation(summary = "Obtener producto por ID", description = "Obtener productopor su ID")
     @GetMapping("/{id}")
     public ProductoResponse obtenerProductoPorId(@PathVariable String id) {
         return productoService.obtenerProductoPorId(id);

@@ -7,13 +7,19 @@ import org.springframework.stereotype.Service;
 import com.kevin.tienda_online.dto.LoginRequest;
 import com.kevin.tienda_online.dto.RegisterRequest;
 import com.kevin.tienda_online.dto.UsuarioResponse;
+import com.kevin.tienda_online.exception.CredencialesInvalidasException;
+import com.kevin.tienda_online.exception.UsuarioNoEncontradoException;
 import com.kevin.tienda_online.exception.UsuarioYaExisteException;
 import com.kevin.tienda_online.model.Rol;
 import com.kevin.tienda_online.model.Usuario;
 import com.kevin.tienda_online.repository.UsuarioRepository;
+import com.kevin.tienda_online.security.JwtService;
 
 @Service
 public class AuthService {
+
+    @Autowired
+    private JwtService jwtService;
 
     @Autowired
     private UsuarioRepository usuarioRepository;
@@ -43,11 +49,11 @@ public class AuthService {
     public String iniciarSesion(LoginRequest request) {
         Usuario usuario = usuarioRepository.findByEmail(request.getEmail());
         if(usuario == null){
-            return "Usuario no encontrado";
+            throw new UsuarioNoEncontradoException("El usuario no existe");
         }else if(passwordEncoder.matches(request.getPassword(), usuario.getPassword())){
-            return "login exitoso";
+            return jwtService.generarToken(usuario.getEmail());
         }
-        return "Contraseña incorrecta";
+        throw new CredencialesInvalidasException("Contraseña incorrecta");
         
     }
 
