@@ -11,6 +11,7 @@ import com.kevin.tienda_online.dto.ProductoResponse;
 import com.kevin.tienda_online.exception.ProductoNoEncontradoException;
 import com.kevin.tienda_online.model.Producto;
 import com.kevin.tienda_online.repository.ProductoRepository;
+import com.kevin.tienda_online.utils.Mensajes;
 
 @Service
 public class ProductoService {
@@ -74,6 +75,15 @@ public class ProductoService {
 
     private Producto obtenerEntidadPorId(String id){
         return productoRepository.findById(id)
-                .orElseThrow(() -> new ProductoNoEncontradoException("Producto no encontrado"));
+                .orElseThrow(() -> new ProductoNoEncontradoException(Mensajes.PRODUCTO_NO_ENCONTRADO));
+    }
+
+    public List<ProductoResponse> buscarPorNombre(String nombre){
+        List<Producto> productos =
+                productoRepository.findByNombreContainingIgnoreCase(nombre);
+
+        return productos.stream()
+                .map(this::convertirAResponse)
+                .toList();
     }
 }

@@ -14,6 +14,7 @@ import com.kevin.tienda_online.model.Rol;
 import com.kevin.tienda_online.model.Usuario;
 import com.kevin.tienda_online.repository.UsuarioRepository;
 import com.kevin.tienda_online.security.JwtService;
+import com.kevin.tienda_online.utils.Mensajes;
 
 @Service
 public class AuthService {
@@ -33,7 +34,7 @@ public class AuthService {
         Usuario usuarioExistente = usuarioRepository.findByEmail(request.getEmail());
 
         if(usuarioExistente != null){ 
-            throw new UsuarioYaExisteException("El usuario ya está registrado");
+            throw new UsuarioYaExisteException(Mensajes.USUARIO_YA_EXISTE);
         }
 
         usuario.setNombre(request.getNombre());
@@ -53,7 +54,7 @@ public class AuthService {
         }else if(passwordEncoder.matches(request.getPassword(), usuario.getPassword())){
             return jwtService.generarToken(usuario.getEmail());
         }
-        throw new CredencialesInvalidasException("Contraseña incorrecta");
+        throw new CredencialesInvalidasException(Mensajes.CREDENCIALES_INVALIDAS);
         
     }
 

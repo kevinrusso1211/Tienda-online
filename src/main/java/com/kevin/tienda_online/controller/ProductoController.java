@@ -3,12 +3,14 @@ package com.kevin.tienda_online.controller;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.kevin.tienda_online.dto.ProductoRequest;
@@ -28,6 +30,7 @@ public class ProductoController {
     @Autowired
     private ProductoService productoService;
 
+    @PreAuthorize("hasRole('ADMIN')")
     @Operation(summary = "Crear producto", description = "Crear un nuevo producto")
     @PostMapping
     public ProductoResponse crearProducto(@Valid @RequestBody ProductoRequest request) {
@@ -46,14 +49,22 @@ public class ProductoController {
         return productoService.obtenerProductoPorId(id);
     }
 
+    @PreAuthorize("hasRole('ADMIN')")
     @PutMapping("/{id}")
     public ProductoResponse actualizarProducto(@PathVariable String id,@Valid @RequestBody ProductoRequest request) {
         return productoService.actualizarProducto(id, request);
     }
 
+    @PreAuthorize("hasRole('ADMIN')")
     @DeleteMapping("/{id}")
     public void eliminarProducto(@PathVariable String id) {
         productoService.eliminarProducto(id);
+    }
+
+    @GetMapping("/buscar")
+    public List<ProductoResponse> buscarPorNombre(
+            @RequestParam String nombre){
+        return productoService.buscarPorNombre(nombre);
     }
 
 }

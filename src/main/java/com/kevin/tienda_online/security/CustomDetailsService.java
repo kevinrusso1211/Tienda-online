@@ -9,6 +9,7 @@ import org.springframework.stereotype.Service;
 
 import com.kevin.tienda_online.model.Usuario;
 import com.kevin.tienda_online.repository.UsuarioRepository;
+import com.kevin.tienda_online.utils.Mensajes;
 
 @Service
 public class CustomDetailsService implements UserDetailsService {
@@ -22,7 +23,7 @@ public class CustomDetailsService implements UserDetailsService {
             Usuario usuario = usuarioRepository.findByEmail(email);
 
             if(usuario == null) {
-                throw new UsernameNotFoundException("Usuario no encontrado");
+                throw new UsernameNotFoundException(Mensajes.USUARIO_NO_ENCONTRADO);
             }
 
             return User.builder()
