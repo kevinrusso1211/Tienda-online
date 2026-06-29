@@ -4,6 +4,8 @@ import java.math.BigDecimal;
 
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
+import org.springframework.data.mongodb.core.mapping.Field;
+import org.springframework.data.mongodb.core.mapping.FieldType;
 
 import lombok.Getter;
 import lombok.Setter;
@@ -18,6 +20,7 @@ public class Producto {
 
     private String nombre;
     private String descripcion;
+    @Field(targetType = FieldType.DECIMAL128)
     private BigDecimal precio;
     private int stock;
     private String imagenUrl;

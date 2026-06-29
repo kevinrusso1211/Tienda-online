@@ -21,8 +21,9 @@ public class Mensajes {
 
     // Pedido
     public static final String PEDIDO_NO_ENCONTRADO = "Pedido no encontrado";
-    public static final String ESTADO_PEDIDO_INVALIDO = "Estado del pedido no válido";
+    public static final String ESTADO_PEDIDO_INVALIDO = "No es posible realizar ese cambio de estado";
+    public static final String PEDIDO_YA_PAGADO = "El pedido ya fue pagado";
+    public static final String PEDIDO_YA_CANCELADO = "El pedido ya fue cancelado";
     
     public static final String STOK_INSUFICIENTE = "Stock insuficiente";
-    public static final String ESTADO_DE_PEDIDO_INVALIDO = "Estado de pedido invalido";
 }

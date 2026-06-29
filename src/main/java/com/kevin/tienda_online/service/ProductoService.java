@@ -1,5 +1,6 @@
 package com.kevin.tienda_online.service;
 
+import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -9,9 +10,12 @@ import org.springframework.stereotype.Service;
 import com.kevin.tienda_online.dto.ProductoRequest;
 import com.kevin.tienda_online.dto.ProductoResponse;
 import com.kevin.tienda_online.exception.ProductoNoEncontradoException;
+import com.kevin.tienda_online.model.Categoria;
 import com.kevin.tienda_online.model.Producto;
 import com.kevin.tienda_online.repository.ProductoRepository;
 import com.kevin.tienda_online.utils.Mensajes;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 
 @Service
 public class ProductoService {
@@ -78,9 +82,39 @@ public class ProductoService {
                 .orElseThrow(() -> new ProductoNoEncontradoException(Mensajes.PRODUCTO_NO_ENCONTRADO));
     }
 
+    public Page<ProductoResponse> listarProductos(Pageable pageable){
+        return productoRepository.findAll(pageable)
+                .map(this::convertirAResponse);
+    }
+
+    //Busquedas
     public List<ProductoResponse> buscarPorNombre(String nombre){
         List<Producto> productos =
                 productoRepository.findByNombreContainingIgnoreCase(nombre);
+
+        return productos.stream()
+                .map(this::convertirAResponse)
+                .toList();
+    }
+
+    public List<ProductoResponse> buscarPorCategoria(Categoria categoria) {
+        List<Producto> productos = productoRepository.findByCategoriaContainingIgnoreCase(categoria);
+
+        return productos.stream()
+                .map(this::convertirAResponse)
+                .toList();
+    }
+
+    public List<ProductoResponse> buscarPorPrecio(BigDecimal min, BigDecimal max) {
+        List<Producto> productos = productoRepository.findByPrecioBetween(min, max);
+
+        return productos.stream()
+                .map(this::convertirAResponse)
+                .toList();
+    }
+
+    public List<ProductoResponse> buscarConStock() {
+        List<Producto> productos = productoRepository.findByStockGreaterThan(0);
 
         return productos.stream()
                 .map(this::convertirAResponse)

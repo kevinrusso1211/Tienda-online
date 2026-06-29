@@ -104,17 +104,12 @@ public class PedidoService {
     }
 
     public List<PedidoResponse> obtenerPedidosUsuario(String usuarioId) {
-
         List<Pedido> pedidos = pedidoRepository.findByUsuarioId(usuarioId);
-
         List<PedidoResponse> respuestas = new ArrayList<>();
-
         for (Pedido pedido : pedidos) {
             respuestas.add(convertirAResponse(pedido));
         }
-
         return respuestas;
-
     }
 
     private PedidoResponse convertirAResponse(Pedido pedido){
@@ -130,10 +125,6 @@ public class PedidoService {
         return response;
     }
 
-    public PedidoResponse obtenerPedidoPorId(String id) {
-        return convertirAResponse(obtenerEntidadPorId(id));
-    }
-
     private Pedido obtenerEntidadPorId(String id){
         return pedidoRepository.findById(id)
                 .orElseThrow(() -> new PedidoNoEncontradoException(Mensajes.PEDIDO_NO_ENCONTRADO));
@@ -141,20 +132,51 @@ public class PedidoService {
 
     public PedidoResponse cambiarEstadoPedido(String id, EstadoPedido nuevoEstado){
         Pedido pedido = obtenerEntidadPorId(id);
-        if(pedido.getEstado() == EstadoPedido.PENDIENTE && nuevoEstado == EstadoPedido.PAGADO){
-            pedido.setEstado(nuevoEstado);
-        }else if(pedido.getEstado() == EstadoPedido.PENDIENTE && nuevoEstado == EstadoPedido.CANCELADO){
-            pedido.setEstado(nuevoEstado);
-        }else if (pedido.getEstado() == EstadoPedido.PAGADO&& nuevoEstado == EstadoPedido.ENVIADO) {
-            pedido.setEstado(nuevoEstado);
-        }else if (pedido.getEstado() == EstadoPedido.ENVIADO&& nuevoEstado == EstadoPedido.ENTREGADO) {
-            pedido.setEstado(nuevoEstado);
-        }else {
-            throw new EstadoPedidoInvalidoException(Mensajes.ESTADO_DE_PEDIDO_INVALIDO);
+        switch (pedido.getEstado()) {
+            case PENDIENTE -> {
+                if (nuevoEstado == EstadoPedido.PAGADO) {
+                    pedido.setEstado(nuevoEstado);
+
+                } else if (nuevoEstado == EstadoPedido.CANCELADO) {
+                    restaurarStock(pedido);
+                    pedido.setEstado(nuevoEstado);
+
+                } else {
+                    throw new EstadoPedidoInvalidoException(Mensajes.ESTADO_PEDIDO_INVALIDO);
+                }
+            }
+
+            case PAGADO -> {
+                if (nuevoEstado == EstadoPedido.ENVIADO) {
+                    pedido.setEstado(nuevoEstado);
+                } else {
+                    throw new EstadoPedidoInvalidoException(Mensajes.ESTADO_PEDIDO_INVALIDO);
+                }
+            }
+
+            case ENVIADO -> {
+                if (nuevoEstado == EstadoPedido.ENTREGADO) {
+                    pedido.setEstado(nuevoEstado);
+                } else {
+                    throw new EstadoPedidoInvalidoException(Mensajes.ESTADO_PEDIDO_INVALIDO);
+                }
+            }
+            
+            default -> throw new EstadoPedidoInvalidoException(Mensajes.ESTADO_PEDIDO_INVALIDO);
         }
         pedidoRepository.save(pedido);
 
         return convertirAResponse(pedido);
+    }
+
+    private void restaurarStock(Pedido pedido) {
+        for (PedidoItem item : pedido.getItems()) {
+            Producto producto = productoRepository.findById(item.getProductoId())
+                    .orElseThrow(() ->
+                            new ProductoNoEncontradoException(Mensajes.PRODUCTO_NO_ENCONTRADO));
+            producto.setStock(producto.getStock() + item.getCantidad());
+            productoRepository.save(producto);
+        }
     }
 
     public List<PedidoResponse> obtenerTodosLosPedidos(){
@@ -173,6 +195,25 @@ public class PedidoService {
             total = total.add(pedido.getTotal());
         }
         return total;
+    }
+
+    public List<PedidoResponse> listarPedidos() {
+        return pedidoRepository.findAll()
+                .stream()
+                .map(this::convertirAResponse)
+                .toList();
+    }
+
+    public PedidoResponse obtenerPedidoPorId(String id) {
+        Pedido pedido = obtenerEntidadPorId(id);
+        return convertirAResponse(pedido);
+    }
+
+    public List<PedidoResponse> listarPedidosPorUsuario(String usuarioId) {
+        return pedidoRepository.findByUsuarioId(usuarioId)
+                .stream()
+                .map(this::convertirAResponse)
+                .toList();
     }
     
 }

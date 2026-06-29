@@ -13,4 +13,5 @@ public class AdminDashboardResponse {
     private Long totalPedidos;
     private BigDecimal totalVentas;
     private Long productosSinStock;
+    private Long pedidosPendientes;
 }
